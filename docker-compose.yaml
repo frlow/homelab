@@ -109,6 +109,19 @@ x-apps:
         - transmission:/config
         - media:/data
 
+  prowlarr: &prowlarr
+      image: lscr.io/linuxserver/prowlarr
+      volumes:
+        - prowlarr:/config
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=${TZ:-Europe/London}
+      labels:
+        "traefik.enable": "true"
+        "traefik.http.routers.prowlarr.entrypoints": websecure
+        "traefik.http.routers.prowlarr.rule": "Host(`prowlarr.${DOMAIN}`)"
+        "traefik.http.routers.prowlarr.tls.certresolver": "default"
 
 volumes:
   traefik:
@@ -116,6 +129,7 @@ volumes:
   plex:
   sonarr:
   transmission:
+  prowlarr: 
   # radarr:
 
 services:
@@ -124,4 +138,5 @@ services:
   plex: *plex
   sonarr: *sonarr
   transmission: *transmission
+  prowlarr: *prowlarr
   # radarr: *radarr
