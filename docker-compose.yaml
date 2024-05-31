@@ -45,13 +45,10 @@ x-apps:
       traefik.enable: true
       traefik.http.routers.login.rule: PathPrefix(`/__login`)
       traefik.http.routers.login.priority: 1000
-      # traefik.http.services.login.loadbalancer.server.port: 3000
-      # traefik.http.routers.login.service: login
       traefik.http.routers.login.entrypoints: websecure
       traefik.http.routers.login.tls.certresolver: default
       traefik.http.middlewares.login.forwardauth.address: http://login:3000/__login/q
       
-
   sonarr: &sonarr
     <<: *common
     image: lscr.io/linuxserver/sonarr
