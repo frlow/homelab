@@ -1,0 +1,130 @@
+name: dt
+
+x-common: &common
+  restart: always
+
+x-apps:
+  traefik: &traefik
+    <<: *common
+    image: traefik
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--api.insecure=true"
+      - "--log.level=DEBUG"
+      - "--entrypoints.web.address=:80"
+      - '--entrypoints.websecure.address=:443'
+      - "--serverstransport.insecureskipverify=true"
+      - '--entrypoints.web.http.redirections.entryPoint.to=websecure'
+      - '--certificatesresolvers.default.acme.httpchallenge.entrypoint=web'
+      - '--certificatesresolvers.default.acme.tlsChallenge=true'
+      - '--certificatesresolvers.default.acme.storage=/data/acme.json'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - traefik:/data
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.traefik.entrypoints": websecure
+      "traefik.http.routers.traefik.rule": "Host(`traefik.${DOMAIN}`)"
+      "traefik.http.routers.traefik.tls.certresolver": "default"
+      "traefik.http.services.traefik.loadbalancer.server.port": "8080"
+      traefik.http.routers.traefik.middlewares: login@docker
+
+  login: &login
+    <<: *common
+    image: login
+    build: ./apps/login
+    environment:
+      DOMAIN: ${DOMAIN}
+      PASSWORD: ${PASSWORD:-password}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.login.rule: PathPrefix(`/__login`)
+      traefik.http.routers.login.priority: 1000
+      # traefik.http.services.login.loadbalancer.server.port: 3000
+      # traefik.http.routers.login.service: login
+      traefik.http.routers.login.entrypoints: websecure
+      traefik.http.routers.login.tls.certresolver: default
+      traefik.http.middlewares.login.forwardauth.address: http://login:3000/__login/q
+      
+
+  sonarr: &sonarr
+    <<: *common
+    image: lscr.io/linuxserver/sonarr
+    volumes:
+      - sonarr:/config
+      - media:/data
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.sonarr.entrypoints": websecure
+      "traefik.http.routers.sonarr.rule": "Host(`sonarr.${DOMAIN}`)"
+      "traefik.http.routers.sonarr.tls.certresolver": "default"
+
+  radarr: &radarr
+    <<: *common
+    image: lscr.io/linuxserver/radarr
+    volumes:
+      - radarr:/config
+      - media:/data
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.radarr.entrypoints": websecure
+      "traefik.http.routers.radarr.rule": "Host(`radarr.${DOMAIN}`)"
+      "traefik.http.routers.radarr.tls.certresolver": "default"
+
+    plex: &plex
+      image: lscr.io/linuxserver/plex
+      network_mode: host
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - VERSION=docker
+      volumes:
+        - plex:/config
+        - media:/data
+
+    transmission: &transmission
+      image: lscr.io/linuxserver/transmission
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=${TZ:-Europe/London}
+        - USER=${USERNAME:-user}
+        - PASS=${PASSWORD:-password}
+      labels:
+        "traefik.enable": "true"
+        "traefik.http.routers.transmission.entrypoints": websecure
+        "traefik.http.routers.transmission.rule": "Host(`transmission.${DOMAIN}`)"
+        "traefik.http.routers.transmission.tls.certresolver": "default"
+      volumes:
+        - transmission:/config
+        - media:/data
+
+
+volumes:
+  traefik:
+  media:
+  plex:
+  sonarr:
+  transmission:
+  # radarr:
+
+services:
+  traefik: *traefik
+  login: *login
+  plex: *plex
+  sonarr: *sonarr
+  transmission: *transmission
+  # radarr: *radarr
