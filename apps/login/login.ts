@@ -48,7 +48,7 @@ const app = new Elysia()
     },
   )
   .get('/__login/q', ({ cookie, set, headers }) => {
-    const accessToken = cookie['access-token']
+    const accessToken = cookie['access-token'].cookie.value as string
     if (tokens[accessToken] && Date.now() < tokens[accessToken]) {
       set.status = 200
       return
