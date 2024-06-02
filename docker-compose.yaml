@@ -81,33 +81,33 @@ x-apps:
       "traefik.http.routers.radarr.rule": "Host(`radarr.${DOMAIN}`)"
       "traefik.http.routers.radarr.tls.certresolver": "default"
 
-    plex: &plex
-      image: lscr.io/linuxserver/plex
-      network_mode: host
-      environment:
-        - PUID=1000
-        - PGID=1000
-        - VERSION=docker
-      volumes:
-        - plex:/config
-        - media:/data
+  plex: &plex
+    image: lscr.io/linuxserver/plex
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+    volumes:
+      - plex:/config
+      - media:/data
 
-    transmission: &transmission
-      image: lscr.io/linuxserver/transmission
-      environment:
-        - PUID=1000
-        - PGID=1000
-        - TZ=${TZ:-Europe/London}
-        - USER=${USERNAME:-user}
-        - PASS=${PASSWORD:-password}
-      labels:
-        "traefik.enable": "true"
-        "traefik.http.routers.transmission.entrypoints": websecure
-        "traefik.http.routers.transmission.rule": "Host(`transmission.${DOMAIN}`)"
-        "traefik.http.routers.transmission.tls.certresolver": "default"
-      volumes:
-        - transmission:/config
-        - media:/data
+  transmission: &transmission
+    image: lscr.io/linuxserver/transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+      - USER=${USERNAME:-user}
+      - PASS=${PASSWORD:-password}
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.transmission.entrypoints": websecure
+      "traefik.http.routers.transmission.rule": "Host(`transmission.${DOMAIN}`)"
+      "traefik.http.routers.transmission.tls.certresolver": "default"
+    volumes:
+      - transmission:/config
+      - media:/data
 
   prowlarr: &prowlarr
       image: lscr.io/linuxserver/prowlarr
@@ -143,7 +143,7 @@ volumes:
   sonarr:
   transmission:
   prowlarr: 
-  # radarr:
+  radarr:
 
 services:
   traefik: *traefik
@@ -153,4 +153,4 @@ services:
   transmission: *transmission
   prowlarr: *prowlarr
   samba: *samba
-  # radarr: *radarr
+  radarr: *radarr
