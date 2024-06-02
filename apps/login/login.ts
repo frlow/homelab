@@ -130,10 +130,6 @@ input{
 <main>
       <h1>Login</h1>
       <form method='post' enctype="application/x-www-form-urlencoded">
-<!--        <label for='username' >-->
-<!--          Username-->
-<!--        </label>-->
-<!--        <input id='username' name='username' />-->
         <label for='password' >
           Password
         </label>

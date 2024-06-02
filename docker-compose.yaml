@@ -123,6 +123,19 @@ x-apps:
         "traefik.http.routers.prowlarr.rule": "Host(`prowlarr.${DOMAIN}`)"
         "traefik.http.routers.prowlarr.tls.certresolver": "default"
 
+  samba: &samba 
+    image: dperson/samba
+    environment:
+      - USERID=1000
+      - GROUPID=1000
+      - TZ=${TZ:-Europe/London}
+    command: -u "${USERNAME:-user};${PASSWORD:-password}" -s "files;/data;yes;no;no"
+    ports:
+      - 139:139
+      - 445:445
+    volumes:
+      - media:/data
+
 volumes:
   traefik:
   media:
@@ -139,4 +152,5 @@ services:
   sonarr: *sonarr
   transmission: *transmission
   prowlarr: *prowlarr
+  samba: *samba
   # radarr: *radarr
