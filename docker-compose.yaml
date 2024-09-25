@@ -48,7 +48,19 @@ x-apps:
       traefik.http.routers.login.entrypoints: websecure
       traefik.http.routers.login.tls.certresolver: default
       traefik.http.middlewares.login.forwardauth.address: http://login:3000/__login/q
-      
+
+  landing: &landing
+    <<: *common
+    image: landing
+    build: ./apps/landing
+    labels:
+      traefik.enable: true
+      traefik.http.routers.login.rule: PathPrefix(`/__login`)
+      traefik.http.routers.login.priority: 1000
+      traefik.http.routers.login.entrypoints: websecure
+      traefik.http.routers.login.tls.certresolver: default
+      traefik.http.middlewares.login.forwardauth.address: http://login:3000/__login/q
+
   sonarr: &sonarr
     <<: *common
     image: lscr.io/linuxserver/sonarr
@@ -64,6 +76,7 @@ x-apps:
       "traefik.http.routers.sonarr.entrypoints": websecure
       "traefik.http.routers.sonarr.rule": "Host(`sonarr.${DOMAIN}`)"
       "traefik.http.routers.sonarr.tls.certresolver": "default"
+      traefik.http.middlewares.sonarr.forwardauth.address: http://login:3000/__login/q
 
   radarr: &radarr
     <<: *common
@@ -80,6 +93,7 @@ x-apps:
       "traefik.http.routers.radarr.entrypoints": websecure
       "traefik.http.routers.radarr.rule": "Host(`radarr.${DOMAIN}`)"
       "traefik.http.routers.radarr.tls.certresolver": "default"
+      traefik.http.middlewares.radarr.forwardauth.address: http://login:3000/__login/q
 
   plex: &plex
     image: lscr.io/linuxserver/plex
@@ -105,6 +119,7 @@ x-apps:
       "traefik.http.routers.transmission.entrypoints": websecure
       "traefik.http.routers.transmission.rule": "Host(`transmission.${DOMAIN}`)"
       "traefik.http.routers.transmission.tls.certresolver": "default"
+      traefik.http.middlewares.transmission.forwardauth.address: http://login:3000/__login/q
     volumes:
       - transmission:/config
       - media:/data
@@ -122,8 +137,9 @@ x-apps:
         "traefik.http.routers.prowlarr.entrypoints": websecure
         "traefik.http.routers.prowlarr.rule": "Host(`prowlarr.${DOMAIN}`)"
         "traefik.http.routers.prowlarr.tls.certresolver": "default"
+        traefik.http.middlewares.prowlarr.forwardauth.address: http://login:3000/__login/q
 
-  samba: &samba 
+  samba: &samba
     image: dperson/samba
     environment:
       - USERID=1000
@@ -142,12 +158,13 @@ volumes:
   plex:
   sonarr:
   transmission:
-  prowlarr: 
+  prowlarr:
   radarr:
 
 services:
   traefik: *traefik
   login: *login
+  landing: *landing
   plex: *plex
   sonarr: *sonarr
   transmission: *transmission
