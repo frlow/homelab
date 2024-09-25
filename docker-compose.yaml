@@ -217,7 +217,7 @@ volumes:
 services:
   traefik: *traefik
   login: *login
-  landing: *landing
+    # landing: *landing
   plex: *plex
   sonarr: *sonarr
   transmission: *transmission
