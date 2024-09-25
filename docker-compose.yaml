@@ -55,11 +55,11 @@ x-apps:
     build: ./apps/landing
     labels:
       traefik.enable: true
-      traefik.http.routers.login.rule: PathPrefix(`/__login`)
-      traefik.http.routers.login.priority: 1000
-      traefik.http.routers.login.entrypoints: websecure
-      traefik.http.routers.login.tls.certresolver: default
-      traefik.http.middlewares.login.forwardauth.address: http://login:3000/__login/q
+      traefik.http.routers.landing.rule: PathPrefix(`/__login`)
+      traefik.http.routers.landing.priority: 1000
+      traefik.http.routers.landing.entrypoints: websecure
+      traefik.http.routers.landing.tls.certresolver: default
+      traefik.http.routers.landing.middlewares: login@docker
 
   sonarr: &sonarr
     <<: *common
@@ -76,7 +76,7 @@ x-apps:
       "traefik.http.routers.sonarr.entrypoints": websecure
       "traefik.http.routers.sonarr.rule": "Host(`sonarr.${DOMAIN}`)"
       "traefik.http.routers.sonarr.tls.certresolver": "default"
-      traefik.http.middlewares.sonarr.forwardauth.address: http://login:3000/__login/q
+      traefik.http.routers.sonarr.middlewares: login@docker
 
   radarr: &radarr
     <<: *common
@@ -93,7 +93,7 @@ x-apps:
       "traefik.http.routers.radarr.entrypoints": websecure
       "traefik.http.routers.radarr.rule": "Host(`radarr.${DOMAIN}`)"
       "traefik.http.routers.radarr.tls.certresolver": "default"
-      traefik.http.middlewares.radarr.forwardauth.address: http://login:3000/__login/q
+      traefik.http.routers.radarr.middlewares: login@docker
 
   plex: &plex
     <<: *common
@@ -121,7 +121,7 @@ x-apps:
       "traefik.http.routers.transmission.entrypoints": websecure
       "traefik.http.routers.transmission.rule": "Host(`transmission.${DOMAIN}`)"
       "traefik.http.routers.transmission.tls.certresolver": "default"
-      traefik.http.middlewares.transmission.forwardauth.address: http://login:3000/__login/q
+      traefik.http.routers.transmission.middlewares: login@docker
     volumes:
       - transmission:/config
       - media:/data
@@ -139,9 +139,9 @@ x-apps:
         "traefik.http.routers.prowlarr.entrypoints": websecure
         "traefik.http.routers.prowlarr.rule": "Host(`prowlarr.${DOMAIN}`)"
         "traefik.http.routers.prowlarr.tls.certresolver": "default"
-        traefik.http.middlewares.prowlarr.forwardauth.address: http://login:3000/__login/q
+        traefik.http.routers.prowlarr.middlewares: login@docker
 
-  samba: &samba 
+  samba: &samba
     <<: *common
     image: dperson/samba
     environment:
