@@ -49,18 +49,6 @@ x-apps:
       traefik.http.routers.login.tls.certresolver: default
       traefik.http.middlewares.login.forwardauth.address: http://login:3000/__login/q
 
-  landing: &landing
-    <<: *common
-    image: landing
-    build: ./apps/landing
-    labels:
-      traefik.enable: true
-      traefik.http.routers.landing.rule: PathPrefix(`/__login`)
-      traefik.http.routers.landing.priority: 1000
-      traefik.http.routers.landing.entrypoints: websecure
-      traefik.http.routers.landing.tls.certresolver: default
-      traefik.http.routers.landing.middlewares: login@docker
-
   sonarr: &sonarr
     <<: *common
     image: lscr.io/linuxserver/sonarr
@@ -217,7 +205,6 @@ volumes:
 services:
   traefik: *traefik
   login: *login
-    # landing: *landing
   plex: *plex
   sonarr: *sonarr
   transmission: *transmission
