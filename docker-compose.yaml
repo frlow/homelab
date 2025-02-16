@@ -188,7 +188,7 @@ x-apps:
       # - UI_TRAFFIC_STATS=true
       # - UI_CHART_TYPE=0 # (0 Charts disabled, 1 # Line chart, 2 # Area chart, 3 # Bar chart)
 
-    image: weejewel/wg-easy
+    image: ghcr.io/wg-easy/wg-easy:latest
     container_name: wg-easy
     volumes:
       - wireguard:/etc/wireguard
@@ -210,6 +210,23 @@ x-apps:
       "traefik.http.services.wireguard.loadbalancer.server.port": "51821"
       "traefik.http.routers.wireguard.middlewares": login@docker
 
+  heimdall: &heimdall
+    <<: *common
+    image: lscr.io/linuxserver/heimdall:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - heimdall:/config
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.heimdall.entrypoints": websecure
+      "traefik.http.routers.heimdall.rule": "Host(`${DOMAIN}`)"
+      "traefik.http.routers.heimdall.tls.certresolver": "default"
+      "traefik.http.services.heimdall.loadbalancer.server.port": "80"
+      "traefik.http.routers.heimdall.middlewares": login@docker
+
 volumes:
   traefik:
   media:
@@ -220,6 +237,7 @@ volumes:
   readarr:  
   radarr:
   wireguard:
+  heimdall:
 
 services:
   traefik: *traefik
@@ -232,3 +250,4 @@ services:
   samba: *samba
   radarr: *radarr
   wireguard: *wireguard
+  heimdall: *heimdall
