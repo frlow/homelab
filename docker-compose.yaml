@@ -115,6 +115,7 @@ x-apps:
       - media:/data
 
   prowlarr: &prowlarr
+      <<: *common
       image: lscr.io/linuxserver/prowlarr
       volumes:
         - prowlarr:/config
@@ -129,6 +130,23 @@ x-apps:
         "traefik.http.routers.prowlarr.tls.certresolver": "default"
         traefik.http.routers.prowlarr.middlewares: login@docker
 
+  readarr: &readarr
+    <<: *common
+    image: "lscr.io/linuxserver/readarr:develop"
+    volumes:
+      - readarr:/config
+      - media:/data
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.readarr.entrypoints": websecure
+      "traefik.http.routers.readarr.rule": "Host(`readarr.${DOMAIN}`)"
+      "traefik.http.routers.readarr.tls.certresolver": "default"
+      traefik.http.routers.readarr.middlewares: login@docker        
+  
   samba: &samba
     <<: *common
     image: dperson/samba
@@ -199,6 +217,7 @@ volumes:
   sonarr:
   transmission:
   prowlarr:
+  readarr:  
   radarr:
   wireguard:
 
@@ -209,6 +228,7 @@ services:
   sonarr: *sonarr
   transmission: *transmission
   prowlarr: *prowlarr
+  readarr: *readarr
   samba: *samba
   radarr: *radarr
   wireguard: *wireguard
