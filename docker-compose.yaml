@@ -199,7 +199,7 @@ x-apps:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=${TZ:-Europe/London}
     volumes:
       - heimdall:/config
     labels:
@@ -209,6 +209,24 @@ x-apps:
       "traefik.http.routers.heimdall.tls.certresolver": "default"
       "traefik.http.services.heimdall.loadbalancer.server.port": "80"
       "traefik.http.routers.heimdall.middlewares": login@docker
+
+  jellyfin: &jellyfin
+    <<: *common
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+    volumes:
+      - jellyfin:/config
+      - media:/data
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.jellyfin.entrypoints": websecure
+      "traefik.http.routers.jellyfin.rule": "Host(`jellyfin.${DOMAIN}`)"
+      "traefik.http.routers.jellyfin.tls.certresolver": "default"
+      "traefik.http.services.jellyfin.loadbalancer.server.port": "8096"
 
 volumes:
   traefik:
@@ -221,6 +239,7 @@ volumes:
   radarr:
   wireguard:
   heimdall:
+  jellyfin:
 
 services:
   traefik: *traefik
@@ -234,3 +253,4 @@ services:
   radarr: *radarr
   wireguard: *wireguard
   heimdall: *heimdall
+  jellyfin: *jellyfin
