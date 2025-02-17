@@ -220,6 +220,7 @@ x-apps:
     volumes:
       - jellyfin:/config
       - media:/data
+      - /dev/dri:/dev/dri
     labels:
       "traefik.enable": "true"
       "traefik.http.routers.jellyfin.entrypoints": websecure
