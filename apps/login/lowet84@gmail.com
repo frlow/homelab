@@ -24,7 +24,7 @@ const app = new Elysia()
   })
   .post(
     '/__login',
-    async ({ body, query, set, request, cookie }) => {
+    async ({ body, query, set, request, cookie, redirect }) => {
       if (body.password === password) {
         const token = generateToken()
         const expires = new Date()
@@ -35,11 +35,11 @@ const app = new Elysia()
           domain: request.url.startsWith('http://localhost:3000') ? '' : domain,
           expires,
         })
-        set.redirect = `${query.redirect || '/'}`
+        return redirect(`${query.redirect || '/'}`)
       } else {
         const queries = ['wrongpass=true']
         if (query.redirect) queries.push(`redirect=${query.redirect}`)
-        set.redirect = `/__login?${queries.join('&')}`
+        return redirect(`/__login?${queries.join('&')}`)
       }
     },
     {
@@ -47,7 +47,7 @@ const app = new Elysia()
       body: t.Object({ password: t.String() }),
     },
   )
-  .get('/__login/q', ({ cookie, set, headers }) => {
+  .get('/__login/q', ({ cookie, set, headers, redirect }) => {
     const accessToken = cookie['access-token'].cookie.value as string
     if (tokens[accessToken] && Date.now() < tokens[accessToken]) {
       set.status = 200
@@ -55,7 +55,7 @@ const app = new Elysia()
     }
     const forwardUrl = headers['x-forwarded-uri']?.split('?')[0] || '/'
     const forwardedHost = headers['x-forwarded-host']
-    set.redirect = `https://${forwardedHost}/__login?redirect=${forwardUrl}`
+    return redirect(`https://${forwardedHost}/__login?redirect=${forwardUrl}`)
   })
   .listen(3000)
 
