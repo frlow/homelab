@@ -55,7 +55,8 @@ const app = new Elysia()
     }
     const forwardUrl = headers['x-forwarded-uri']?.split('?')[0] || '/'
     const forwardedHost = headers['x-forwarded-host']
-    return redirect(`https://${forwardedHost}/__login?redirect=${forwardUrl}`)
+    const protocol = headers['x-forwarded-proto'] || 'https'
+    return redirect(`${protocol}://${forwardedHost}/__login?redirect=${forwardUrl}`)
   })
   .listen(3000)
 
