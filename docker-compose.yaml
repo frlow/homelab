@@ -34,6 +34,7 @@ x-apps:
       "traefik.http.services.traefik.loadbalancer.server.port": "8080"
       traefik.http.routers.traefik.middlewares: login@docker
 
+
   login: &login
     <<: *common
     image: login
