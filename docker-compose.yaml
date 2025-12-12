@@ -268,6 +268,29 @@ x-apps:
       "traefik.http.services.n8n.loadbalancer.server.port": "5678"
       "traefik.http.routers.n8n.middlewares": login@docker
 
+  dev: &dev
+    <<: *common
+    image: lscr.io/linuxserver/openssh-server:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SUDO_ACCESS=true #optional
+      - PUBLIC_KEY=${PUBLICKEY:-key}
+      - USER_NAME=${USERNAME:-user}
+      - LOG_STDOUT=true
+    volumes:
+      - dev:/config
+      - dev-data:/data
+    ports:
+      - 2222:2222
+    labels:
+      "traefik.enable": "true"
+      "traefik.tcp.routers.dev.entrypoints": websecure
+      "traefik.tcp.routers.dev.rule": "HostSNI(`dev.${DOMAIN}`)"
+      "traefik.tcp.routers.dev.tls.certresolver": "default"
+      "traefik.tcp.services.dev.loadbalancer.server.port": "2222"
+
 volumes:
   traefik:
   media:
@@ -282,6 +305,8 @@ volumes:
   jellyfin:
   netbootxyz:
   n8n:
+  dev:
+  dev-data:
 
 services:
   traefik: *traefik
@@ -297,3 +322,4 @@ services:
   heimdall: *heimdall
   jellyfin: *jellyfin
   n8n: *n8n
+  dev: *dev
