@@ -281,7 +281,6 @@ x-apps:
       - LOG_STDOUT=true
     volumes:
       - dev:/config
-      - dev-data:/data
     ports:
       - 2222:2222
     labels:
@@ -290,6 +289,51 @@ x-apps:
       "traefik.tcp.routers.dev.rule": "HostSNI(`dev.${DOMAIN}`)"
       "traefik.tcp.routers.dev.tls.certresolver": "default"
       "traefik.tcp.services.dev.loadbalancer.server.port": "2222"
+
+
+  convex-backend: &convex-backend
+    <<: *common
+    image: ghcr.io/get-convex/convex-backend:latest
+    volumes:
+      - convex:/convex/data
+    environment:
+      - CONVEX_CLOUD_ORIGIN=${CONVEX_CLOUD_ORIGIN:-http://127.0.0.1:${PORT:-3210}}
+      - CONVEX_SITE_ORIGIN=${CONVEX_SITE_ORIGIN:-http://127.0.0.1:${SITE_PROXY_PORT:-3211}}
+
+    healthcheck:
+      test: curl -f http://localhost:3210/version
+      interval: 5s
+      start_period: 10s
+
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.convex-backend-public.entrypoints": websecure
+      "traefik.http.routers.convex-backend-public.rule": "Host(`convex.${DOMAIN}`)"
+      "traefik.http.routers.convex-backend-public.tls.certresolver": "default"
+      "traefik.http.services.convex-backend-public.loadbalancer.server.port": "3211"
+      "traefik.http.routers.convex-backend-public.service": "convex-backend-public"
+      "traefik.http.routers.convex-backend-api.entrypoints": websecure
+      "traefik.http.routers.convex-backend-api.rule": "Host(`convex-api.${DOMAIN}`)"
+      "traefik.http.routers.convex-backend-api.tls.certresolver": "default"
+      "traefik.http.services.convex-backend-api.loadbalancer.server.port": "3210"
+      "traefik.http.routers.convex-backend-api.service": "convex-backend-api"
+
+  convex-dashboard: &convex-dashboard
+    <<: *common
+    image: ghcr.io/get-convex/convex-dashboard:latest
+    environment:
+      - NEXT_PUBLIC_DEPLOYMENT_URL=${NEXT_PUBLIC_DEPLOYMENT_URL:-http://127.0.0.1:${PORT:-3210}}
+#        - NEXT_PUBLIC_LOAD_MONACO_INTERNALLY
+    depends_on:
+      convex-backend:
+        condition: service_healthy
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.convex-dashboard.entrypoints": websecure
+      "traefik.http.routers.convex-dashboard.rule": "Host(`convex-dashboard.${DOMAIN}`)"
+      "traefik.http.routers.convex-dashboard.tls.certresolver": "default"
+      "traefik.http.services.convex-dashboard.loadbalancer.server.port": "6791"
+      "traefik.http.routers.convex-dashboard.middlewares": login@docker
 
 volumes:
   traefik:
@@ -306,7 +350,7 @@ volumes:
   netbootxyz:
   n8n:
   dev:
-  dev-data:
+  convex:
 
 services:
   traefik: *traefik
@@ -323,3 +367,5 @@ services:
   jellyfin: *jellyfin
   n8n: *n8n
   dev: *dev
+  convex-backend: *convex-backend
+  convex-dashboard: *convex-dashboard
