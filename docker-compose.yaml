@@ -335,7 +335,24 @@ x-apps:
       "traefik.http.services.convex-dashboard.loadbalancer.server.port": "6791"
       "traefik.http.routers.convex-dashboard.middlewares": login@docker
 
+  forgejo: &forgejo
+    <<: *common
+    image: codeberg.org/forgejo/forgejo:14
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    volumes:
+      - forgejo:/data
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.forgejo.entrypoints": websecure
+      "traefik.http.routers.forgejo.rule": "Host(`forgejo.${DOMAIN}`)"
+      "traefik.http.routers.forgejo.tls.certresolver": "default"
+      "traefik.http.services.forgejo.loadbalancer.server.port": "3000"
+
 volumes:
+  forgejo:
   traefik:
   media:
   plex:
@@ -353,6 +370,7 @@ volumes:
   convex:
 
 services:
+  forgejo: *forgejo
   traefik: *traefik
   login: *login
   plex: *plex
