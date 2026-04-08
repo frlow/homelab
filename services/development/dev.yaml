@@ -1,0 +1,25 @@
+services:
+  dev:
+    restart: always
+    image: lscr.io/linuxserver/openssh-server:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SUDO_ACCESS=true
+      - PUBLIC_KEY=${PUBLICKEY:-key}
+      - USER_NAME=${USERNAME:-user}
+      - LOG_STDOUT=true
+    volumes:
+      - dev:/config
+    ports:
+      - 2222:2222
+    labels:
+      "traefik.enable": "true"
+      "traefik.tcp.routers.dev.entrypoints": websecure
+      "traefik.tcp.routers.dev.rule": "HostSNI(`dev.${DOMAIN}`)"
+      "traefik.tcp.routers.dev.tls.certresolver": "default"
+      "traefik.tcp.services.dev.loadbalancer.server.port": "2222"
+
+volumes:
+  dev:

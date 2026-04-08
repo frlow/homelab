@@ -1,0 +1,33 @@
+services:
+  traefik:
+    restart: always
+    image: traefik
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--api.insecure=true"
+      - "--log.level=DEBUG"
+      - "--entrypoints.web.address=:80"
+      - '--entrypoints.websecure.address=:443'
+      - "--serverstransport.insecureskipverify=true"
+      - '--entrypoints.web.http.redirections.entryPoint.to=websecure'
+      - '--certificatesresolvers.default.acme.httpchallenge.entrypoint=web'
+      - '--certificatesresolvers.default.acme.tlsChallenge=true'
+      - '--certificatesresolvers.default.acme.storage=/data/acme.json'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - traefik:/data
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.traefik.entrypoints": websecure
+      "traefik.http.routers.traefik.rule": "Host(`traefik.${DOMAIN}`)"
+      "traefik.http.routers.traefik.tls.certresolver": "default"
+      "traefik.http.services.traefik.loadbalancer.server.port": "8080"
+      traefik.http.routers.traefik.middlewares: login@docker
+
+volumes:
+  traefik:

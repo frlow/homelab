@@ -1,0 +1,14 @@
+services:
+  samba:
+    restart: always
+    image: dperson/samba
+    environment:
+      - USERID=1000
+      - GROUPID=1000
+      - TZ=${TZ:-Europe/London}
+    command: -u "${USERNAME:-user};${PASSWORD:-password}" -s "files;/data;yes;no;no"
+    ports:
+      - 139:139
+      - 445:445
+    volumes:
+      - media:/data

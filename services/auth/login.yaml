@@ -1,0 +1,15 @@
+services:
+  login:
+    restart: always
+    image: login
+    build: ../../apps/login
+    environment:
+      DOMAIN: ${DOMAIN}
+      PASSWORD: ${PASSWORD:-password}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.login.rule: PathPrefix(`/__login`)
+      traefik.http.routers.login.priority: 1000
+      traefik.http.routers.login.entrypoints: websecure
+      traefik.http.routers.login.tls.certresolver: default
+      traefik.http.middlewares.login.forwardauth.address: http://login:3000/__login/q

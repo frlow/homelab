@@ -1,0 +1,21 @@
+services:
+  netbootxyz:
+    restart: always
+    image: lscr.io/linuxserver/netbootxyz:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - netbootxyz:/config
+    ports:
+      - 69:69/udp
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.netbootxyz.entrypoints": websecure
+      "traefik.http.routers.netbootxyz.rule": "Host(`netbootxyz.${DOMAIN}`)"
+      "traefik.http.routers.netbootxyz.tls.certresolver": "default"
+      "traefik.http.services.netbootxyz.loadbalancer.server.port": "3000"
+
+volumes:
+  netbootxyz:

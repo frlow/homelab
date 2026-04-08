@@ -1,0 +1,23 @@
+services:
+  jellyfin:
+    restart: always
+    image: lscr.io/linuxserver/jellyfin:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+    volumes:
+      - jellyfin:/config
+      - media:/data
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/card0:/dev/dri/card0
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.jellyfin.entrypoints": websecure
+      "traefik.http.routers.jellyfin.rule": "Host(`jellyfin.${DOMAIN}`)"
+      "traefik.http.routers.jellyfin.tls.certresolver": "default"
+      "traefik.http.services.jellyfin.loadbalancer.server.port": "8096"
+
+volumes:
+  jellyfin:

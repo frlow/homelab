@@ -1,0 +1,20 @@
+services:
+  heimdall:
+    restart: always
+    image: lscr.io/linuxserver/heimdall:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+    volumes:
+      - heimdall:/config
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.heimdall.entrypoints": websecure
+      "traefik.http.routers.heimdall.rule": "Host(`${DOMAIN}`)"
+      "traefik.http.routers.heimdall.tls.certresolver": "default"
+      "traefik.http.services.heimdall.loadbalancer.server.port": "80"
+      "traefik.http.routers.heimdall.middlewares": login@docker
+
+volumes:
+  heimdall:

@@ -1,0 +1,22 @@
+services:
+  transmission:
+    restart: always
+    image: lscr.io/linuxserver/transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+      - USER=${USERNAME:-user}
+      - PASS=${PASSWORD:-password}
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.transmission.entrypoints": websecure
+      "traefik.http.routers.transmission.rule": "Host(`transmission.${DOMAIN}`)"
+      "traefik.http.routers.transmission.tls.certresolver": "default"
+      traefik.http.routers.transmission.middlewares: login@docker
+    volumes:
+      - transmission:/config
+      - media:/data
+
+volumes:
+  transmission:

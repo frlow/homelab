@@ -1,0 +1,20 @@
+services:
+  radarr:
+    restart: always
+    image: lscr.io/linuxserver/radarr
+    volumes:
+      - radarr:/config
+      - media:/data
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-Europe/London}
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.radarr.entrypoints": websecure
+      "traefik.http.routers.radarr.rule": "Host(`radarr.${DOMAIN}`)"
+      "traefik.http.routers.radarr.tls.certresolver": "default"
+      traefik.http.routers.radarr.middlewares: login@docker
+
+volumes:
+  radarr:
