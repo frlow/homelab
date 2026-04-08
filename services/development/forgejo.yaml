@@ -15,5 +15,24 @@ services:
       "traefik.http.routers.forgejo.tls.certresolver": "default"
       "traefik.http.services.forgejo.loadbalancer.server.port": "3000"
 
+  forgejo-runner-dind:
+    image: docker:dind
+    privileged: true
+    command: ["dockerd", "-H", "tcp://0.0.0.0:2375", "--tls=false"]
+    restart: unless-stopped
+
+  forgejo-runner:
+    image: data.forgejo.org/forgejo/runner:11
+    depends_on:
+      - forgejo-runner-dind
+    environment:
+      DOCKER_HOST: tcp://forgejo-runner-dind:2375
+    user: "1001:1001"
+    volumes:
+      - forgejo-runner-data:/data
+    restart: unless-stopped
+    command: /bin/sh -c "sleep 5; forgejo-runner daemon --config /data/config.yml"
+
 volumes:
   forgejo:
+  forgejo-runner-data:
