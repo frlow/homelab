@@ -1,0 +1,39 @@
+services:
+  registry:
+    restart: always
+    image: registry:2
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry_data:/var/lib/registry
+    labels:
+      "traefik.enable": "true"
+      # External Access (CLI): Secured with Basic Auth
+      "traefik.http.routers.registry.entrypoints": websecure
+      "traefik.http.routers.registry.rule": "Host(`registry.${DOMAIN}`)"
+      "traefik.http.routers.registry.tls.certresolver": "default"
+      "traefik.http.routers.registry.middlewares": "registry-auth"
+      "traefik.http.middlewares.registry-auth.basicauth.users": "${BASIC_AUTH}"
+      "traefik.http.services.registry.loadbalancer.server.port": "5000"
+
+  registry-ui:
+    restart: always
+    image: joxit/docker-registry-ui:latest
+    environment:
+      # Use the UI container as a proxy to the registry
+      # This bypasses Traefik's Basic Auth for internal requests
+      NGINX_PROXY_PASS_URL: "http://registry:5000"
+      REGISTRY_URL: "https://registry-ui.${DOMAIN}"
+      DELETE_IMAGES: "true"
+      REGISTRY_TITLE: "My Registry"
+      SINGLE_REGISTRY: "true"
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.registry-ui.entrypoints": websecure
+      "traefik.http.routers.registry-ui.rule": "Host(`registry-ui.${DOMAIN}`)"
+      "traefik.http.routers.registry-ui.tls.certresolver": "default"
+      "traefik.http.services.registry-ui.loadbalancer.server.port": "80"
+      "traefik.http.routers.registry-ui.middlewares": login@docker
+
+volumes:
+  registry_data:

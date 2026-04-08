@@ -1,0 +1,10 @@
+services:
+  forskola:
+    restart: always
+    image: registry.fredriklowenhamn.se/forskola-app
+    labels:
+      "traefik.enable": "true"
+      "traefik.http.routers.forskola.entrypoints": websecure
+      "traefik.http.routers.forskola.rule": "Host(`forskola.${DOMAIN}`)"
+      "traefik.http.routers.forskola.tls.certresolver": "default"
+      "traefik.http.services.forskola.loadbalancer.server.port": "4321"

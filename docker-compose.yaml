@@ -5,7 +5,9 @@ include:
   - services/development/convex.yaml
   - services/development/dev.yaml
   - services/development/forgejo.yaml
+  - services/private/forskola.yaml
   - services/development/n8n.yaml
+  - services/development/registry.yaml
   - services/infrastructure/traefik.yaml
   - services/infrastructure/wireguard.yaml
 #  - services/media/immich.yaml

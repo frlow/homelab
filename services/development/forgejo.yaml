@@ -18,7 +18,7 @@ services:
   forgejo-runner-dind:
     image: docker:dind
     privileged: true
-    command: ["dockerd", "-H", "tcp://0.0.0.0:2375", "--tls=false"]
+    command: ["dockerd", "-H", "tcp://0.0.0.0:2376", "--tls=false"]
     restart: unless-stopped
 
   forgejo-runner:
@@ -26,7 +26,7 @@ services:
     depends_on:
       - forgejo-runner-dind
     environment:
-      DOCKER_HOST: tcp://forgejo-runner-dind:2375
+      DOCKER_HOST: tcp://forgejo-runner-dind:2376
     user: "1001:1001"
     volumes:
       - forgejo-runner-data:/data
